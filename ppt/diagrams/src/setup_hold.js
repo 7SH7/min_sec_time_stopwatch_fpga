@@ -1,0 +1,51 @@
+const { C, t, tr, rect, line, wire, dff, svgDoc } = require('./lib');
+const F = 28;
+module.exports = () => {
+  const W = 1500, H = 1020;
+  let s = '';
+  const M = (x, y, str, o = {}) => t(x, y, str, { mono: true, size: F, ...o });
+  // ---------- timing ----------
+  const X0 = 170, XE = 1030, EDGE = 640, TSU = 150, TH = 90, TCQ = 70;
+  const rows = ['CLK', 'D (1)', 'Q (1)', 'D (2)', 'Q (2)', 'D (3)'];
+  const RY = i => 110 + i * 98;
+  const hi = i => RY(i) + 14, lo = i => RY(i) + 52, mid = i => RY(i) + 33;
+  s += rect(EDGE - TSU, RY(1) - 4, TSU + TH, RY(5) + 66 - RY(1), { fill: '#E6E7EA', stroke: 'none' });
+  s += line(EDGE, 60, EDGE, RY(5) + 66, { stroke: C.ink, sw: 1.5, dash: '6 5' });
+  const dim = (x1, x2, y, label) => wire([[x1, y], [x2, y]], { startArrow: true, sw: 1.5 }) + M((x1 + x2) / 2, y - 28, label);
+  s += line(EDGE - TSU, 56, EDGE - TSU, RY(1) - 4, { stroke: C.grey, sw: 1 });
+  s += line(EDGE + TH, 56, EDGE + TH, RY(1) - 4, { stroke: C.grey, sw: 1 });
+  s += dim(EDGE - TSU, EDGE, 70, 't_su') + dim(EDGE, EDGE + TH, 70, 't_h');
+  rows.forEach((r, i) => s += M(X0 - 20, mid(i), r, { anchor: 'end', color: i === 0 ? C.grey : C.ink }));
+  const P = 420; let d = `M${X0},${lo(0)}`;
+  for (let x = EDGE - P; x < XE; x += P) d += ` L${x},${lo(0)} L${x},${hi(0)} L${Math.min(x + P / 2, XE)},${hi(0)}` + (x + P / 2 < XE ? ` L${x + P / 2},${lo(0)}` : '');
+  d += ` L${XE},${lo(0)}`;
+  s += `<path d="${d}" fill="none" stroke="${C.grey}" stroke-width="2"/>`;
+  const step = (i, x, col) => `<path d="M${X0},${lo(i)} L${x},${lo(i)} L${x},${hi(i)} L${XE},${hi(i)}" fill="none" stroke="${col || C.ink}" stroke-width="${col ? 3 : 2}"/>`;
+  s += step(1, 380) + step(2, EDGE + TCQ);
+  s += wire([[EDGE, mid(2)], [EDGE + TCQ, mid(2)]], { startArrow: true, sw: 1.5 });
+  s += M(EDGE + TCQ + 26, mid(2) + 8, 't_cq', { anchor: 'start' });
+  s += t(XE + 30, mid(1), 'OK : 엣지에서 1 캡처', { anchor: 'start', size: F });
+  s += step(3, EDGE - 50, C.red);
+  const U1 = EDGE + TCQ, U2 = 900;
+  s += `<path d="M${X0},${lo(4)} L${U1},${lo(4)}" stroke="${C.ink}" stroke-width="2" fill="none"/>`;
+  s += `<path d="M${U1},${mid(4)} L${U1 + 9},${hi(4)} L${U2 - 9},${hi(4)} L${U2},${mid(4)} L${U2 - 9},${lo(4)} L${U1 + 9},${lo(4)} Z" fill="#fff" stroke="${C.red}" stroke-width="3"/>`;
+  s += M((U1 + U2) / 2, mid(4), '?', { color: C.red, weight: 'bold' });
+  s += `<path d="M${U2},${mid(4)} L${U2 + 10},${hi(4)} L${XE},${hi(4)} M${U2},${mid(4)} L${U2 + 10},${lo(4)} L${XE},${lo(4)}" stroke="${C.grey}" stroke-width="2" stroke-dasharray="6 5" fill="none"/>`;
+  s += t(XE + 30, mid(4), '위반 → 값 불확실', { anchor: 'start', color: C.red, weight: 'bold', size: F });
+  s += step(5, 940);
+  s += t(XE + 30, mid(5), 'OK : 다음 엣지에서 캡처', { anchor: 'start', size: F });
+
+  // ---------- flip-flop + formulas ----------
+  const TOP = 750;
+  s += line(10, TOP - 20, W - 10, TOP - 20, { stroke: '#D9DBDF', sw: 1 });
+  const f = dff(70, TOP + 20, { w: 130, h: 170, pin: F });
+  s += f.svg;
+  s += wire([[10, f.d[1]], f.d]) + wire([f.q, [260, f.q[1]]]);
+  s += wire([[10, f.clk[1]], f.clk], { stroke: C.grey });
+  s += t(330, TOP + 40, 'setup', { anchor: 'start', color: C.grey, size: F });
+  s += M(450, TOP + 40, 'T_clk ≥ t_cq + t_logic(max) + t_su', { anchor: 'start' });
+  s += t(330, TOP + 100, 'hold', { anchor: 'start', color: C.grey, size: F });
+  s += M(450, TOP + 100, 't_cq + t_logic(min) ≥ t_h', { anchor: 'start' });
+  s += t(330, TOP + 175, '회색 구간 안에서 D 가 바뀌면 안 된다', { anchor: 'start', color: C.grey, size: F });
+  return svgDoc(W, H, s);
+};

@@ -72,7 +72,8 @@
 - [x] **Step 2** 모듈 구현 (`src/` 11개) + 모듈별 자가판정 테스트벤치 (`sim/` 5개) + `constraints/Basys3.xdc` (2026-10-22, 구현 에이전트)
 - [x] **Step 3** 코드 리뷰 (별도 리뷰 에이전트) → BLOCKER 0 / MAJOR 0 / MINOR 8. 반영 내용은 아래 3-1
 - [ ] **Step 4** Vivado 에서 합성 / 시뮬레이션 / 타이밍 차트 캡처 / 보드 동작 영상 ← **다음 할 일**
-- [ ] **Step 5** 트러블슈팅 기록, PPT 작성
+- [x] **Step 5** 발표자료 27장: 원고(`ppt/OUTLINE.md`) → 다이어그램 13장(`ppt/assets/`, `node diagrams/build.js` 로 재생성) → `ppt/stopwatch_presentation.pptx` (`build_deck.js`). 렌더링 검사 2회(글자 크기 키움, 겹침 0). 영상·실제 파형 캡처·이름 7곳은 `{{...}}` 로 남김 (2026-10-22)
+- [ ] **Step 6** Vivado 결과(TB 콘솔, 파형, Timing Summary, 보드 영상)를 PPT `{{...}}` 자리에 채우고 트러블슈팅 표 갱신
 
 ### 3-1. 리뷰에서 나온 것과 처리
 | 지적 | 처리 |
@@ -104,4 +105,11 @@ docs/         설계 문서
 src/          합성 대상 Verilog
 sim/          테스트벤치
 constraints/  Basys3 XDC
+ppt/          발표자료. OUTLINE.md(원고) / diagrams/(그림 소스, build.js) / assets/(PNG) / build_deck.js / stopwatch_presentation.pptx
 ```
+
+### 발표자료를 만든 방식
+- 원고를 먼저 쓰고(슬라이드 텍스트 + 발표자 노트), 그림과 레이아웃은 원고에 맞춰 뒤에 만들었다. 슬라이드 문장은 원고 그대로이고 요약 bullet 로 바꾸지 않았다.
+- 그림은 전부 코드(SVG/WaveDrom JSON → PNG)로 그려서 수정과 재생성이 가능하다. 글자 겹침·잘림은 렌더링한 PNG 를 눈으로 보고 고쳤다.
+- 타이밍 차트 3장은 코드 동작을 기준으로 그린 "예상 파형"이다. Vivado xsim 캡처가 나오면 교체한다.
+- 디자인은 흰 배경, 글자색 1종 + 보조 회색 1종 + 강조 빨강 1종(7세그먼트 색), 장식 요소 없음. 표지와 섹션 표지에만 7세그먼트 글리프를 둔다.
