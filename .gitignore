@@ -1,0 +1,12 @@
+.DS_Store
+*.jou
+*.log
+*.str
+.Xil/
+*.cache/
+*.hw/
+*.runs/
+*.sim/
+*.srcs/
+*.ip_user_files/
+.omc/
